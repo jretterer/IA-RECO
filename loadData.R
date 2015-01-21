@@ -1,11 +1,12 @@
 #Load images
 
-#images <- read.table("http://www.loria.fr/~bougrain/pub/databases/train-images.gz", sep =" "); #Ne fonctionne pas
+#images <- read.table(url("http://www.loria.fr/~bougrain/pub/databases/train-labels.gz")); #Ne fonctionne pas
 
 images <- read.table("C:/Users/jretterer/Desktop/data/train-images.txt", sep = " ");
 
 #Load labels
 labels <- read.table("C:/Users/jretterer/Desktop/data/train-labels.txt");
+#labels <- read.table(gzfile("C:/Users/jretterer/Downloads/ia/train-labels.gz"));
 
 #Normalsier entre -1 et 1 les valeurs des niveaux de gris
 imagesNorm <- (images[,1:784]-128)/128
