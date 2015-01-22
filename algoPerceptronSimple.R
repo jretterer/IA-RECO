@@ -75,9 +75,9 @@ perceptronSimple <- function(dataTrain = dataTrain, labelTrain = labelTrain, lab
   #Initialize weights with random values
   w <- runif(784, -1, 1);
   
-  for ( i in 1:N ) {
+  for ( i in 1:nIters ) {
     print(i)
-    for ( j in 1:nEntries ) {
+    for ( j in 1:nSamples ) {
       entries <- input[,j];
       a <- sum(entries * w) - th;
       if (a > 0) {
@@ -97,20 +97,25 @@ perceptronSimple <- function(dataTrain = dataTrain, labelTrain = labelTrain, lab
   res <- replace(res, which(res <= 0), 0);
   return(res);
 }
-
 #Load labels
 #path "C:/Users/Utilisateur/Desktop/IAData/ia/train-labels.gz"
-labels <- read.table("C:/Users/jretterer/Desktop/data/train-labels.txt");
+#"C:/Users/jretterer/Desktop/data/train-labels.txt"
+labels <- read.table(file=file.choose());
 
 #Load images
 #path "C:/Users/Utilisateur/Desktop/IAData/ia/train-images.gz"
-images <- read.table("C:/Users/jretterer/Desktop/data/train-images.txt");
+#"C:/Users/jretterer/Desktop/data/train-images.txt"
+images <-  read.table(file=file.choose());
 
 #perceptron simple
-res <- perceptronSimple(images, labels, 1);
+res <- perceptronSimple(images, labels, 9);
+label <- setLabel(labels[[1]],1);
 stats <- results(label[1:60000], res[1:60000])
 errorRate(stats)
 stats
+stats[1]/(stats[3]+stats[1])#precision
+stats[1]/(stats[4]+stats[1])#rappel
+#return(c(tp, tn, fp, fn));
 
 #############################
 #Testing  ###################
