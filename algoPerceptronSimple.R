@@ -2,7 +2,7 @@
 ###########################
 
 #algo
-#Dit si le nombre manuscrit est un zero ou non
+#Dit si le nombre manuscrit est x ou non
 
 #functions
 sigmoide <- function( x ) { #f(a) = 1 / (1 + exp(-a)) f'(a) = f(a) * (1 - f(a))
@@ -37,66 +37,145 @@ setLabel <- function( labels, x ) {
   return(label);
 }
 
-truePositives <- function ( t, y ) {
+results <- function ( t, y ) {
+  tp <- 0;
+  tn <- 0;
+  fp <- 0;
+  fn <- 0;
+  for (i in 1:length(t)) {
+    if (y[i] == t[i] & y[i] == 1) {
+      tp <- tp + 1;
+    }
+    else if (y[i] == t[i] & y[i] == 0) {
+      tn <- tn + 1;
+    }
+    else if (y[i] != t[i] & y[i] == 1) {
+      fp <- fp + 1;
+    }
+    else {
+      fn <- fn + 1;
+    }
+  }
   
+  return(c(tp, tn, fp, fn));
 }
 
-#Load results
+errorRate <- function (x) {
+  return(1 - (x[1] + x[2]) / sum(x));
+}
+
+perceptronSimple <- function(dataTrain = dataTrain, labelTrain = labelTrain, lab = 0, th = 0.3, alpha = 0.25, nIters = 500, nSamples = 2000) {
+  #Normalsier entre -1 et 1 les valeurs des niveaux de gris
+  imagesNorm <- (dataTrain[,1:784]) / 255;
+  #T(X)
+  input <- t(imagesNorm);
+  
+  label <- setLabel(labelTrain[[1]], lab);
+  
+  #Initialize weights with random values
+  w <- runif(784, -1, 1);
+  
+  for ( i in 1:N ) {
+    print(i)
+    for ( j in 1:nEntries ) {
+      entries <- input[,j];
+      a <- sum(entries * w) - th;
+      if (a > 0) {
+        x <- 1;
+      }
+      else {
+        x <- -1;
+      }
+      if (label[j] != x) {
+        w <- w + alpha * (label[j] - x) * entries;
+      }
+    }
+  }
+  
+  res <- colSums(input * w) - th;
+  res <- replace(res, which(res > 0), 1);
+  res <- replace(res, which(res <= 0), 0);
+  return(res);
+}
+
+#Load labels
 #path "C:/Users/Utilisateur/Desktop/IAData/ia/train-labels.gz"
 labels <- read.table("C:/Users/jretterer/Desktop/data/train-labels.txt");
-#Remplace les valeurs différentes de x par 0 et les x par 1
-lab <- 1;
-label <- setLabel(labels[[1]], lab);
 
-#Load input
+#Load images
 #path "C:/Users/Utilisateur/Desktop/IAData/ia/train-images.gz"
 images <- read.table("C:/Users/jretterer/Desktop/data/train-images.txt");
-#Normalsier entre -1 et 1 les valeurs des niveaux de gris
-imagesNorm <- (images[,1:784] - 128) / 128;
 
-imagesNorm <- (images[,1:784]) / 256;
+#perceptron simple
+res <- perceptronSimple(images, labels, 1);
+stats <- results(label[1:60000], res[1:60000])
+errorRate(stats)
+stats
+
+#############################
+#Testing  ###################
+#############################
+
+#Normalsier entre -1 et 1 les valeurs des niveaux de gris
+imagesNorm <- (images[,1:784]) / 255;
 #T(X)
 input <- t(imagesNorm);
 
 #Initialize weights with random values
-eights <- runif(784, -2, 2);
+w <- runif(784, -1, 1);
 
 #threshhold
-threshhold <- 0.3;
+th <- 0.3;
 
 #coeff d'apprentissage
 alpha <- 0.25;
 
 #Nb itérations
-N <- 1;
-nEntries <- 500;
+N <- 500;
+nEntries <- 2000;
 for ( i in 1:N ) {
   print(i)
-#   for ( j in 1:nEntries) {
-#     print(j)
-#     entries <- input[,j];
-#     a <- sum(entries * weights) - threshhold;
-#     print(a)
+  for ( j in 1:nEntries ) {
+    entries <- input[,j];
+    a <- sum(entries * w) - th;
+    if (a > 0) {
+      x <- 1;
+    }
+    else {
+      x <- -1;
+    }
+    if (label[j] != x) {
+      w <- w + alpha * (label[j] - x) * entries;
+    }
+    
 #     output <- sigmoide(a);
 #     error <- errorQuadra(label[j], output);
-#     b <- - alpha * sigmoidePrime(a) * errorQuadraPrime(label[j], output);
-#     deltaW <- b * entries;
-#     weights <- weights + deltaW;
-#     threshhold <- threshhold + b;
-#   }
-  a <- colSums(input * weights) - threshhold;
-  output <- sigmoide(a);
-  error <- mean(errorQuadra(label, output));
-  b <- - alpha * sigmoidePrime(a) * errorQuadraPrime(label, output);
-  deltaW <- rowMeans(b * input);
-  weights <- weights + deltaW;
-  threshhold <- threshhold + mean(b);
-}w
+#     if (abs(label[j] - output) > 0.20 ) {
+#       b <- - (alpha * sigmoidePrime(a) * errorQuadraPrime(label[j], output));
+#       dW <- b * entries;
+#       w <- w + dW;
+#       th <- th + b;
+#     }
+  }
+#   a <- colSums(input * weights) - threshhold;
+#   output <- sigmoide(a);
+#   error <- mean(errorQuadra(label, output));
+#   b <- - alpha * sigmoidePrime(a) * errorQuadraPrime(label, output);
+#   deltaW <- rowMeans(b * input);
+#   weights <- weights + deltaW;
+#   threshhold <- threshhold + mean(b);
+}
 
-res <- sigmoide(colSums(input * weights) - threshhold);
+res <- colSums(input * w) - th;
+res <- replace(res, which(res > 0), 1);
+res <- replace(res, which(res <= 0), 0);
 res <- round(res, 2);
 head(res,20)
 head(label,20)
 res
 
 labels0
+
+stats <- results(label[1:60000], res[1:60000])
+errorRate(stats)
+stats
