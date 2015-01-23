@@ -115,7 +115,7 @@ images <-  read.table(file=file.choose());
 lab <- 1;
 res <- perceptronSimple(images, labels, lab);
 label <- setLabel(labels[[1]], lab);
-stats <- results(label[1:60000], res[1:60000])
+stats <- results(label, res);
 errorRate(stats)
 stats
 stats[1]/(stats[3]+stats[1])#precision
