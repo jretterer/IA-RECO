@@ -96,22 +96,36 @@ perceptronSimple <- function(dataTrain = dataTrain, labelTrain = labelTrain, lab
   res <- replace(res, which(res <= 0), 0);
   return(res);
 }
+<<<<<<< HEAD
 
 ############################
 #Perceptron simple
 ############################
 
+=======
+>>>>>>> 48aa5d0e9fba8053259ddaaabb3a1202b66ef760
 #Load labels
 #path "C:/Users/Utilisateur/Desktop/IAData/ia/train-labels.gz"
-labels <- read.table("C:/Users/jretterer/Desktop/data/train-labels.txt");
+#"C:/Users/jretterer/Desktop/data/train-labels.txt"
+labels <- read.table(file=file.choose());
 
 #Load images
 #path "C:/Users/Utilisateur/Desktop/IAData/ia/train-images.gz"
-images <- read.table("C:/Users/jretterer/Desktop/data/train-images.txt");
+#"C:/Users/jretterer/Desktop/data/train-images.txt"
+images <-  read.table(file=file.choose());
 
 #perceptron simple
+<<<<<<< HEAD
 res <- perceptronSimple(images, labels, 1);
 stats <- results(label, res)
+=======
+res <- perceptronSimple(images, labels, 9);
+label <- setLabel(labels[[1]],1);
+stats <- results(label[1:60000], res[1:60000])
+>>>>>>> 48aa5d0e9fba8053259ddaaabb3a1202b66ef760
 errorRate(stats)
 stats
+stats[1]/(stats[3]+stats[1])#precision
+stats[1]/(stats[4]+stats[1])#rappel
+#return(c(tp, tn, fp, fn));
 
