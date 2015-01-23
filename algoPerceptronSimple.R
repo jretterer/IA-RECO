@@ -112,8 +112,9 @@ labels <- read.table(file=file.choose());
 images <-  read.table(file=file.choose());
 
 #perceptron simple
-res <- perceptronSimple(images, labels, 9);
-label <- setLabel(labels[[1]],1);
+lab <- 1;
+res <- perceptronSimple(images, labels, lab);
+label <- setLabel(labels[[1]], lab);
 stats <- results(label[1:60000], res[1:60000])
 errorRate(stats)
 stats
