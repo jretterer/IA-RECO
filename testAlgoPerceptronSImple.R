@@ -67,3 +67,11 @@ labels0
 stats <- results(label[1:60000], res[1:60000])
 errorRate(stats)
 stats
+
+#test functions
+f <- function(a=a,x=0) {
+  print(x)
+}
+f()
+f(2,1)
+f(x=2)

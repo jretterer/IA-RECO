@@ -63,16 +63,23 @@ errorRate <- function (x) {
   return(1 - (x[1] + x[2]) / sum(x));
 }
 
-perceptronSimple <- function(dataTrain = dataTrain, labelTrain = labelTrain, lab = 0, th = 0.3, alpha = 0.25, nIters = 500, nSamples = 2000) {
+perceptronSimple <- function(dataTrain = dataTrain, labelTrain = labelTrain, alpha = 0.25, nIters = 500, nSamples = 2000) {
   #Normalsier entre -1 et 1 les valeurs des niveaux de gris
   imagesNorm <- (dataTrain[,1:784]) / 255;
   #T(X)
   input <- t(imagesNorm);
   
-  label <- setLabel(labelTrain[[1]], lab);
+  #label <- setLabel(labelTrain[[1]], lab);
+  label <- labelTrain * 2 - 1;
+
+  print(paste("Alpha = ", alpha, sep = ""))
+  print(paste("NIters = ", nIters, sep = ""))
+  print(paste("NSamples = ", nSamples, sep = ""))
+  
   
   #Initialize weights with random values
   w <- runif(784, -1, 1);
+  th <- runif(1, -1, 1);
   
   for ( i in 1:nIters ) {
     print(i)
@@ -85,13 +92,14 @@ perceptronSimple <- function(dataTrain = dataTrain, labelTrain = labelTrain, lab
       else {
         x <- -1;
       }
-      if (label[j] != x) {
-        w <- w + alpha * (label[j] - x) * entries; #erreur : (label[j] - x)
+      if (labelTrain[j] != x) {
+        w <- w + alpha * (labelTrain[j] - x) * entries; #erreur : (label[j] - x)
       }
     }
   }
   
   res <- colSums(input * w) - th;
+  res <- (res + 1) / 2;
   res <- replace(res, which(res > 0), 1);
   res <- replace(res, which(res <= 0), 0);
   return(res);
@@ -113,8 +121,8 @@ images <-  read.table(file=file.choose());
 
 #perceptron simple
 lab <- 1;
-res <- perceptronSimple(images, labels, lab);
 label <- setLabel(labels[[1]], lab);
+res <- perceptronSimple(images, label, nIters = 500);
 stats <- results(label, res);
 errorRate(stats)
 stats
