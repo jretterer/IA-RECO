@@ -63,26 +63,40 @@ errorRate <- function (x) {
   return(1 - (x[1] + x[2]) / sum(x));
 }
 
-perceptronSimple <- function(dataTrain = dataTrain, labelTrain = labelTrain, alpha = 0.25, nIters = 500, nSamples = 2000) {
+precision <- function(x) {
+  return(x[1]/(x[3]+x[1]));
+}
+
+rappel <- function(x) {
+  return(x[1]/(x[4]+x[1]));
+}
+
+#Perceptron Simple avec fonction linéaire
+perceptronSimple <- function(dataTrain = dataTrain, 
+                             labelTrain = labelTrain, 
+                             alpha = 0.25, 
+                             nIters = 500, 
+                             nSamples = 2000,
+                             th = 0.3) {
   #Normalsier entre -1 et 1 les valeurs des niveaux de gris
-  imagesNorm <- (dataTrain[,1:784]) / 255;
-  #T(X)
-  input <- t(imagesNorm);
+  input <- t((dataTrain[,1:784]) / 255);
   
-  #label <- setLabel(labelTrain[[1]], lab);
-  label <- labelTrain * 2 - 1;
+  label <- labelTrain * 2 - 1; #label = 1 si chiffre recherché, label = 0 sinon
 
   print(paste("Alpha = ", alpha, sep = ""))
   print(paste("NIters = ", nIters, sep = ""))
   print(paste("NSamples = ", nSamples, sep = ""))
+  print(paste("Th = ", th, sep = ""))
   
   
-  #Initialize weights with random values
+  #Initialize weights and threshhold with random values
   w <- runif(784, -1, 1);
-  th <- runif(1, -1, 1);
+  #th <- runif(1, -1, 1);
   
   for ( i in 1:nIters ) {
-    print(i)
+    if (i %% 100 == 0) { #Affiche uniquement les multiple de 100 (donc 100/200/300/400/500 si 500 nIters)
+      print(i)
+    }
     for ( j in 1:nSamples ) {
       entries <- input[,j];
       a <- sum(entries * w) - th;
@@ -93,7 +107,10 @@ perceptronSimple <- function(dataTrain = dataTrain, labelTrain = labelTrain, alp
         x <- -1;
       }
       if (labelTrain[j] != x) {
+        #Weights Update
         w <- w + alpha * (labelTrain[j] - x) * entries; #erreur : (label[j] - x)
+        #ThreshHold Update
+        th <- th + alpha * (labelTrain[j] - x);
       }
     }
   }
@@ -102,6 +119,52 @@ perceptronSimple <- function(dataTrain = dataTrain, labelTrain = labelTrain, alp
   res <- (res + 1) / 2;
   res <- replace(res, which(res > 0), 1);
   res <- replace(res, which(res <= 0), 0);
+  return(res);
+}
+
+#Perceptron Simple avec fonction sigmoide
+perceptronSimpleSigmoide <- function(dataTrain = dataTrain, 
+                                     labelTrain = labelTrain, 
+                                     alpha = 0.25, 
+                                     nIters = 500, 
+                                     nSamples = 2000,
+                                     th = 0.3,
+                                     validation = 0.7) {
+  #Normalsier entre -1 et 1 les valeurs des niveaux de gris
+  input <- t((dataTrain[,1:784]) / 255);
+  
+  label <- labelTrain; #label = 1 si chiffre recherché, label = 0 sinon
+  
+  print(paste("Alpha = ", alpha, sep = ""))
+  print(paste("NIters = ", nIters, sep = ""))
+  print(paste("NSamples = ", nSamples, sep = ""))
+  print(paste("Th = ", th, sep = ""))
+  
+  
+  #Initialize weights and threshhold with random values
+  w <- runif(784, -1, 1);
+  #th <- runif(1, -1, 1);
+  
+  for ( i in 1:nIters ) {
+    if (i %% 100 == 0) {
+      print(i)
+    }
+    for ( j in 1:nSamples ) {
+      entries <- input[,j];
+      a <- sum(entries * w) - th;
+      x <- sigmoide(a);
+      if (labelTrain[j] != x) {
+        #Weights Update
+        w <- w + alpha * (labelTrain[j] - x) * entries;
+        #ThreshHold Update
+        th <- th + alpha * (labelTrain[j] - x);
+      }
+    }
+  }
+  
+  res <- colSums(input * w) - th;
+  res <- replace(res, which(res > validation), 1);
+  res <- replace(res, which(res <= validation), 0);
   return(res);
 }
 
@@ -119,14 +182,23 @@ labels <- read.table(file=file.choose());
 #"C:/Users/jretterer/Desktop/data/train-images.txt"
 images <-  read.table(file=file.choose());
 
-#perceptron simple
+#Perceptron
 lab <- 1;
 label <- setLabel(labels[[1]], lab);
-res <- perceptronSimple(images, label, nIters = 500);
-stats <- results(label, res);
-errorRate(stats)
-stats
-stats[1]/(stats[3]+stats[1])#precision
-stats[1]/(stats[4]+stats[1])#rappel
-#return(c(tp, tn, fp, fn));
+
+res1 <- perceptronSimple(images, label);
+stats1 <- results(label, res1);
+stats1
+errorRate(stats1)
+precision(stats1)
+rappel(stats1)
+
+res2 <- perceptronSimpleSigmoide(images, label);
+stats2 <- results(label, res2);
+stats2
+errorRate(stats2)
+precision(stats2)
+rappel(stats2)
+
+
 
