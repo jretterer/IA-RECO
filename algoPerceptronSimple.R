@@ -60,15 +60,15 @@ results <- function ( t, y ) {
 }
 
 errorRate <- function (x) {
-  return(1 - (x[1] + x[2]) / sum(x));
+  return((1 - (x[1] + x[2]) / sum(x))*100);
 }
 
 precision <- function(x) {
-  return(x[1]/(x[3]+x[1]));
+  return((x[1]/(x[3]+x[1]))*100);
 }
 
 rappel <- function(x) {
-  return(x[1]/(x[4]+x[1]));
+  return((x[1]/(x[4]+x[1]))*100);
 }
 
 #Perceptron Simple avec fonction linéaire
@@ -82,7 +82,7 @@ perceptronSimple <- function(dataTrain = dataTrain,
   input <- t((dataTrain[,1:784]) / 255);
   
   label <- labelTrain * 2 - 1; #label = 1 si chiffre recherché, label = 0 sinon
-
+  
   print(paste("Alpha = ", alpha, sep = ""))
   print(paste("NIters = ", nIters, sep = ""))
   print(paste("NSamples = ", nSamples, sep = ""))
@@ -135,20 +135,16 @@ perceptronSimpleSigmoide <- function(dataTrain = dataTrain,
   
   label <- labelTrain; #label = 1 si chiffre recherché, label = 0 sinon
   
-  print(paste("Alpha = ", alpha, sep = ""))
-  print(paste("NIters = ", nIters, sep = ""))
-  print(paste("NSamples = ", nSamples, sep = ""))
-  print(paste("Th = ", th, sep = ""))
-  
-  
   #Initialize weights and threshhold with random values
   w <- runif(784, -1, 1);
-  #th <- runif(1, -1, 1);
+  #debut <- runif(1, 1, length(dataTrain)-nSamples);
+  #faire le random debut et voir ou relier dans l'autre fonction
   
   for ( i in 1:nIters ) {
     if (i %% 100 == 0) {
       print(i)
     }
+    #for ( j in debut:nSamples ) {
     for ( j in 1:nSamples ) {
       entries <- input[,j];
       a <- sum(entries * w) - th;
@@ -165,7 +161,61 @@ perceptronSimpleSigmoide <- function(dataTrain = dataTrain,
   res <- colSums(input * w) - th;
   res <- replace(res, which(res > validation), 1);
   res <- replace(res, which(res <= validation), 0);
-  return(res);
+  return(list("res" = res,"w" = w));
+}
+
+
+#10 chiffres 10 perceptrons
+reseau <- function(images = images, 
+                   labels = labels, 
+                   alpha = 0.25, 
+                   nIters = 500, 
+                   nSamples = 2000,
+                   th = 0.3,
+                   validation = 0.7) {
+  
+  print(paste("Alpha = ", alpha, sep = ""))
+  print(paste("NIters = ", nIters, sep = ""))
+  print(paste("NSamples = ", nSamples, sep = ""))
+  print(paste("Th = ", th, sep = ""))
+  
+  wres <- c(); 
+  
+  for ( i in 0:9 ) {
+    label <- setLabel(labels[[1]], i);
+    result <- perceptronSimpleSigmoide(images, label,alpha,nIters,nSamples,th,validation);
+    stats2 <- results(label, result$res);
+    wres <- matrix(c(wres,result$w),10,784);
+    cat(sprintf("Nombre %s : erreur %s°/., precision %s°/.,rappel %s°/.\n",i,errorRate(stats2),precision(stats2),rappel(stats2)))
+  }
+  
+  return(wres);
+}
+
+#ecrit le fichier correspondant
+ecrireFichier <- function(images = images, 
+                          wres = wres,
+                          nameFichier=nameFichier) {
+
+  fileConn<-file(nameFichier);
+  input <- t((images[,1:784]) / 255);
+  res<-c();
+  for ( i in 1:ncol(input) ) {
+  #for ( i in 1:100 ) {# a changer
+      entries <- input[,i];
+      j <- 1;
+      while ( j < 11 ) {
+         a <- sum(entries * wres[j,]);
+         x <- sigmoide(a);# a voir si sigmoide bien comme ca
+         if(round(x) == 1){
+           res<-c(res,paste("",j-1));
+           j <- j + 10;
+         }
+        j <- j + 1;
+       }# si on rentre dans aucun cas on ecrit rien a changer
+  }
+  writeLines(res, fileConn);
+  close(fileConn);
 }
 
 ############################
@@ -183,22 +233,32 @@ labels <- read.table(file=file.choose());
 images <-  read.table(file=file.choose());
 
 #Perceptron
-lab <- 1;
-label <- setLabel(labels[[1]], lab);
 
-res1 <- perceptronSimple(images, label);
-stats1 <- results(label, res1);
-stats1
-errorRate(stats1)
-precision(stats1)
-rappel(stats1)
+#lab <- 1;
+#label <- setLabel(labels[[1]], lab);
 
-res2 <- perceptronSimpleSigmoide(images, label);
-stats2 <- results(label, res2);
-stats2
-errorRate(stats2)
-precision(stats2)
-rappel(stats2)
+#res1 <- perceptronSimple(images, label);
+#stats1 <- results(label, res1);
+#stats1
+#errorRate(stats1)
+#precision(stats1)
+#rappel(stats1)
+
+#res2$res <- perceptronSimpleSigmoide(images, label);
+#stats2 <- results(label, res2$res);
+#stats2
+#errorRate(stats2)
+#precision(stats2)
+#rappel(stats2)
+
+wres <- reseau(images, labels,nIters = 500,nSamples = 2000);
+
+imagestest <-  read.table(file=file.choose());
+
+#/Users/xaviereyl/Documents/RProject/test-labels.gz
+ecrireFichier(imagestest, wres,"/Users/xaviereyl/Documents/RProject/test-labels.gz");
+
+# a voir le random + function ecrireFichier a corriger...
 
 
 
