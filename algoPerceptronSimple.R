@@ -258,8 +258,3 @@ imagestest <-  read.table(file=file.choose());
 
 #/Users/xaviereyl/Documents/RProject/test-labels.gz
 ecrireFichier(imagestest, wres,"/Users/xaviereyl/Documents/RProject/test-labels.gz");
-
-# a voir le random + function ecrireFichier a corriger...
-
-
-
