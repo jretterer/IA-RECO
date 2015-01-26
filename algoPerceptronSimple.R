@@ -138,13 +138,13 @@ perceptronSimpleSigmoide <- function(dataTrain = dataTrain,
   #Initialize weights and threshhold with random values
   w <- runif(784, -1, 1);
   debut <- runif(1, 1, nrow(dataTrain)-nSamples);
-  
+  debut <- round(debut);
+  fin <- debut+nSamples ;
   for ( i in 1:nIters ) {
     if (i %% 100 == 0) {
       print(i)
     }
-    for ( j in debut:nSamples ) {
-    #for ( j in 1:nSamples ) {
+    for ( j in debut:fin) {
       entries <- input[,j];
       a <- sum(entries * w) - th;
       x <- sigmoide(a);
