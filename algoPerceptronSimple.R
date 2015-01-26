@@ -137,15 +137,14 @@ perceptronSimpleSigmoide <- function(dataTrain = dataTrain,
   
   #Initialize weights and threshhold with random values
   w <- runif(784, -1, 1);
-  #debut <- runif(1, 1, length(dataTrain)-nSamples);
-  #faire le random debut et voir ou relier dans l'autre fonction
+  debut <- runif(1, 1, nrow(dataTrain)-nSamples);
   
   for ( i in 1:nIters ) {
     if (i %% 100 == 0) {
       print(i)
     }
-    #for ( j in debut:nSamples ) {
-    for ( j in 1:nSamples ) {
+    for ( j in debut:nSamples ) {
+    #for ( j in 1:nSamples ) {
       entries <- input[,j];
       a <- sum(entries * w) - th;
       x <- sigmoide(a);
@@ -201,18 +200,20 @@ ecrireFichier <- function(images = images,
   input <- t((images[,1:784]) / 255);
   res<-c();
   for ( i in 1:ncol(input) ) {
-  #for ( i in 1:100 ) {# a changer
       entries <- input[,i];
       j <- 1;
+      maxx <- 0;
+      nbx <- 0;
       while ( j < 11 ) {
          a <- sum(entries * wres[j,]);
-         x <- sigmoide(a);# a voir si sigmoide bien comme ca
-         if(round(x) == 1){
-           res<-c(res,paste("",j-1));
-           j <- j + 10;
+         x <- sigmoide(a);
+         if(x > maxx){
+           maxx <- x;
+           nbx <- j - 1;
          }
         j <- j + 1;
-       }# si on rentre dans aucun cas on ecrit rien a changer
+       }
+      res<-c(res,paste("",nbx));
   }
   writeLines(res, fileConn);
   close(fileConn);
