@@ -1,3 +1,13 @@
+
+t <- function(label, i, x) {
+  if (label[1,] == x) {
+    return(1);
+  }
+  else {
+    return(0);
+  }
+}
+
 #Perceptron Simple avec fonction sigmoide
 PMC <- function(dataTrain = dataTrain,
                 labelTrain = labelTrain,
@@ -68,8 +78,10 @@ labels <- read.table(file=file.choose());
 #path "C:/Users/Utilisateur/Desktop/IAData/ia/train-images.gz"
 #"C:/Users/jretterer/Desktop/data/train-images.txt"
 images <-  read.table(file=file.choose());
+alpha <- 0.3;
 
 w1 <- matrix(,784,4);
+dW1 <- w1;
 for ( i in 1:4 ) {
   w1[,i] <- runif((784), -1, 1);
 }
@@ -77,22 +89,38 @@ th1 <- rep(0.3, 4);
 
 #Initialize weights and threshold with random values in the output layer
 w2 <- matrix(,4,10);
+dW2 <- w2;
 for ( i in 1:10 ) {
   w2[,i] <- runif((4), -1, 1);
 }
 th2 <- rep(0.3, 10);
 
 input <- t((images[,1:784]) / 255);
-entries <- input[,1];
+x <- input[,1];
 
-a1 <- colSums(w1 * entries) - th1;
+a1 <- colSums(w1 * x) - th1;
 
 y1 <- 1 / (1 + exp(-a1));
   
-a2 <- colSums(w2 * a) - th2;
+a2 <- colSums(w2 * y1) - th2;
   
 y2 <- 1 / (1 + exp(-a2));
 
+#Couche de sortie
+#Pour chaque neurone en sortie
+#dW2 <- alpha * (t - y2) * y2 * (1 - y2) * y1;
 for ( i in 1:10 ) {
   print(y2[[i]])
+  dW2[,i] <- alpha * (t(labels,1,i - 1) - y2[[i]]) * y2[[i]] * (1 - y2[[i]]) * y1;
+}
+
+#Couche cachée
+#Pour chaque neurone de la couche cachée
+#dW1 <- - alpha * y1 * (1 - y1) * x * sum(-(t - y2) * w2);
+for ( i in 1:4 ) {
+  output <- rep(0, 10);
+  for (j in 1:10) {
+    output[j] <- t(labels,1,j - 1); 
+  }
+  dW1[,i] <- - alpha * y1[[i]] * (1 - y1[[i]]) * x * sum(-(output - y2) * w2[i,]);
 }
