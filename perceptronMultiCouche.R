@@ -17,44 +17,46 @@ PMC <- function(dataTrain = dataTrain,
   for ( i in 1:nNeurones ) {
     w1[,i] <- runif((784), -1, 1);
   }
-  th1 <- th;
+  th1 <- rep(th, nNeurones);
   
   #Initialize weights and threshold with random values in the output layer
-  w2 <- matrix(,784,10);
+  w2 <- matrix(,nNeurones,10);
   for ( i in 1:10 ) {
-    w2[,i] <- runif((784), -1, 1);
+    w2[,i] <- runif((nNeurones), -1, 1);
   }
-  th2 <- th;
+  th2 <- rep(th, 10);
+  
+   
   
   #w <- runif(784, -1, 1);
   #debut <- runif(1, 1, nrow(dataTrain)-nSamples);
   
-  for ( i in 1:nIters ) {
-    if (i %% 100 == 0) {
-      print(i)
-    }
-    for ( j in 1:nSamples ) {
-      #for ( j in 1:nSamples ) {
-      entries <- input[,j];
-      for ( k in 1:nNeurones ) {
-        
-      }
-      a <- sum(entries * w) - th;
-      x <- sigmoide(a);
-      if (labelTrain[j] != x) {
-        #Weights Update
-        w <- w + alpha * (labelTrain[j] - x) * entries;
-        #ThreshHold Update
-        th <- th + alpha * (labelTrain[j] - x);
-      }
-    }
-  }
-  
-  res <- colSums(input * w) - th;
-  res <- replace(res, which(res > validation), 1);
-  res <- replace(res, which(res <= validation), 0);
-  return(list("res" = res,"w" = w));
-}
+#   for ( i in 1:nIters ) {
+#     if (i %% 100 == 0) {
+#       print(i)
+#     }
+#     for ( j in 1:nSamples ) {
+#       #for ( j in 1:nSamples ) {
+#       entries <- input[,j];
+#       for ( k in 1:nNeurones ) {
+#         
+#       }
+#       a <- sum(entries * w) - th;
+#       x <- sigmoide(a);
+#       if (labelTrain[j] != x) {
+#         #Weights Update
+#         w <- w + alpha * (labelTrain[j] - x) * entries;
+#         #ThreshHold Update
+#         th <- th + alpha * (labelTrain[j] - x);
+#       }
+#     }
+#   }
+#   
+#   res <- colSums(input * w) - th;
+#   res <- replace(res, which(res > validation), 1);
+#   res <- replace(res, which(res <= validation), 0);
+#   return(list("res" = res,"w" = w));
+# }
 
 
 #Load labels
@@ -71,7 +73,26 @@ w1 <- matrix(,784,4);
 for ( i in 1:4 ) {
   w1[,i] <- runif((784), -1, 1);
 }
+th1 <- rep(0.3, 4);
 
-entries <- images[1,];
+#Initialize weights and threshold with random values in the output layer
+w2 <- matrix(,4,10);
+for ( i in 1:10 ) {
+  w2[,i] <- runif((4), -1, 1);
+}
+th2 <- rep(0.3, 10);
 
-a <- sum(entries * w1) - 0.3
+input <- t((images[,1:784]) / 255);
+entries <- input[,1];
+
+a1 <- colSums(w1 * entries) - th1;
+
+y1 <- 1 / (1 + exp(-a1));
+  
+a2 <- colSums(w2 * a) - th2;
+  
+y2 <- 1 / (1 + exp(-a2));
+
+for ( i in 1:10 ) {
+  print(y2[[i]])
+}
