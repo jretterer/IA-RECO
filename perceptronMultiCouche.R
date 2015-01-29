@@ -8,6 +8,17 @@ checkLab <- function(label, i, x) {
   }
 }
 
+#compare 2 labels
+compare <- function( labels, labels_res ) {
+  nbcorrect <- 0;
+  for (i in 1:nrow(labels)) {
+    if (labels[i,] == labels_res[i,]) {
+      nbcorrect <- nbcorrect + 1;
+    }
+  }
+  return(nbcorrect);
+}
+
 #Perceptron Simple avec fonction sigmoide
 train <- function(dataTrain = dataTrain,
                 labelTrain = labelTrain,
@@ -149,6 +160,18 @@ test <- function (dataTest = dataTest,
   }
 }
 
+#ecrit le fichier correspondant
+ecrireFichier <- function(label = label, 
+                          nameFichier=nameFichier) {
+  
+  fileConn<-file(nameFichier);
+  res<-c();
+  for ( i in 1:length(label) ) {    
+    res<-c(res,paste("",label[i]));
+  }
+  writeLines(res, fileConn);
+  close(fileConn);
+}
 
 #Load labels
 #path "C:/Users/Utilisateur/Desktop/IAData/ia/train-labels.gz"
@@ -162,11 +185,26 @@ images <-  read.table(file=file.choose());
 
 res1 <- train(images, labels, nIters = 100, nSamples = 10000, nNeurones = 11);
 
+#comparaison sur 400
 res2 <- test(dataTest = images[10000:10400,], res = res1, labelTest = labels[10000:10400,]);
-
 res2$stats
 res2$res
 res2$y
+
+#comparaison sur tout le train
+res3 <- test(dataTest = images[0:60000,], res = res1, labelTest = labels[0:60000,]);
+res3$stats
+ecrireFichier(res3$res,"/Users/xaviereyl/Documents/RProject/train-labels-multi.gz");#reecrit pour vérifier
+labels_rendu <- read.table(file=file.choose());
+#et on compare
+nombre <- compare(labels_rendu, labels);
+cat(sprintf(" %s nombres justes sur %s\n",nombre,nrow(labels)))
+
+#ecriture du fichier test_label
+imagestest <-  read.table(file=file.choose());
+res4 <- test(dataTest = imagestest[0:10000,], res = res1);
+ecrireFichier(res4$res,"/Users/xaviereyl/Documents/RProject/test-labels-multi.gz");
+
 
 # alpha <- 0.3;
 # 
