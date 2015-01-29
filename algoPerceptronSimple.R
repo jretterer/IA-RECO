@@ -240,38 +240,15 @@ ecrireFichier <- function(images = images,
 ############################
 
 #Load labels
-#path "C:/Users/Utilisateur/Desktop/IAData/ia/train-labels.gz"
-#"C:/Users/jretterer/Desktop/data/train-labels.txt"
 labels <- read.table(file=file.choose());
 
 #Load images
-#path "C:/Users/Utilisateur/Desktop/IAData/ia/train-images.gz"
-#"C:/Users/jretterer/Desktop/data/train-images.txt"
 images <-  read.table(file=file.choose());
 
-#Perceptron
-
-#lab <- 1;
-#label <- setLabel(labels[[1]], lab);
-
-#res1 <- perceptronSimple(images, label);
-#stats1 <- results(label, res1);
-#stats1
-#errorRate(stats1)
-#precision(stats1)
-#rappel(stats1)
-
-#res2$res <- perceptronSimpleSigmoide(images, label);
-#stats2 <- results(label, res2$res);
-#stats2
-#errorRate(stats2)
-#precision(stats2)
-#rappel(stats2)
-
+#reseau de neuronnes simples.
 wres <- reseau(images, labels,nIters = 500,nSamples = 2000);
 
-
-#permet de re-écrire le fichier train label
+#permet d'écrire le fichier train_label_predit
 ecrireFichier(images, wres,"/Users/xaviereyl/Documents/RProject/train-labels-rendu.gz");
 #on le relit
 labels_rendu <- read.table(file=file.choose());
@@ -281,6 +258,5 @@ cat(sprintf(" %s nombres justes sur %s\n",res,nrow(labels)))
 
 #On créer le fichier prédit sur test
 imagestest <-  read.table(file=file.choose());
-
 #/Users/xaviereyl/Documents/RProject/test-labels.gz
-ecrireFichier(imagestes, wres,"/Users/xaviereyl/Documents/RProject/test-labels.gz");
+ecrireFichier(imagestest, wres,"/Users/xaviereyl/Documents/RProject/test-labels.gz");
