@@ -202,14 +202,19 @@ ecrireFichier <- function(images = images,
   for ( i in 1:ncol(input) ) {
       entries <- input[,i];
       j <- 1;
-      maxx <- 0;
+      maxx <- -100000;
       nbx <- 0;
       while ( j < 11 ) {
          a <- sum(entries * wres[j,]);
-         x <- sigmoide(a);
-         if(x > maxx){
-           maxx <- x;
-           nbx <- j - 1;
+         #x <- sigmoide(a);
+         #cat(sprintf("Nombre %s : a %s, x %s\n",j-1,a,x))
+         #if(x > maxx){
+         if(a > maxx){
+           #cat(sprintf("****Nombre %s : a %s, x %s\n",j-1,a,x))
+            #cat(sprintf("****Nombre %s : a %s\n",j-1,a))
+            #maxx <- x;
+            maxx <- a;
+            nbx <- j - 1;
          }
         j <- j + 1;
        }
