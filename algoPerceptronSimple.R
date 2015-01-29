@@ -36,6 +36,17 @@ setLabel <- function( labels, x ) {
   return(label);
 }
 
+compare <- function( labels, labels_res ) {
+  nbcorrect <- 0;
+  for (i in 1:nrow(labels)) {
+    if (labels[i,] == labels_res[i,]) {
+      nbcorrect <- nbcorrect + 1;
+    }
+  }
+  return(nbcorrect);
+}
+
+
 results <- function ( t, y ) {
   tp <- 0;
   tn <- 0;
@@ -259,7 +270,17 @@ images <-  read.table(file=file.choose());
 
 wres <- reseau(images, labels,nIters = 500,nSamples = 2000);
 
+
+#permet de re-écrire le fichier train label
+ecrireFichier(images, wres,"/Users/xaviereyl/Documents/RProject/train-labels-rendu.gz");
+#on le relit
+labels_rendu <- read.table(file=file.choose());
+#et on compare
+res <- compare(labels_rendu, labels);
+cat(sprintf(" %s nombres justes sur %s\n",res,nrow(labels)))
+
+#On créer le fichier prédit sur test
 imagestest <-  read.table(file=file.choose());
 
 #/Users/xaviereyl/Documents/RProject/test-labels.gz
-ecrireFichier(imagestest, wres,"/Users/xaviereyl/Documents/RProject/test-labels.gz");
+ecrireFichier(imagestes, wres,"/Users/xaviereyl/Documents/RProject/test-labels.gz");
