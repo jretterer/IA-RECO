@@ -14,7 +14,6 @@ train <- function(dataTrain = dataTrain,
                 alpha = 0.25, 
                 nIters = 500, 
                 nSamples = 2000,
-                th = 0.3,
                 nNeurones = 4) {
   #Normalsier entre -1 et 1 les valeurs des niveaux de gris
   input <- t((dataTrain[,1:784]) / 255);
@@ -25,9 +24,9 @@ train <- function(dataTrain = dataTrain,
   w1 <- matrix(,784,nNeurones);
   dw1 <- w1;
   for ( i in 1:nNeurones ) {
-    w1[,i] <- runif((784), -1, 1);
+    w1[,i] <- runif(784, -1, 1);
   }
-  th1 <- rep(th, nNeurones);
+  th1 <- runif(nNeurones, -1, 1);
   
   #Initialize weights and threshold with random values in the output layer
   w2 <- matrix(,nNeurones,10);
@@ -35,16 +34,15 @@ train <- function(dataTrain = dataTrain,
   for ( i in 1:10 ) {
     w2[,i] <- runif((nNeurones), -1, 1);
   }
-  th2 <- rep(th, 10); 
-  
-  #w <- runif(784, -1, 1);
-  #debut <- runif(1, 1, nrow(dataTrain)-nSamples);
+  th2 <- runif(10, -1, 1);
   
   for ( i in 1:nIters ) {
 #     if (i %% 100 == 0) {
 #       print(i)
 #     }
     print(i)
+    print(th2)
+    print(th1)
     for ( j in 1:nSamples ) {
       x <- input[,j];
       
@@ -55,31 +53,45 @@ train <- function(dataTrain = dataTrain,
       #Fonction sigmoide
       a2 <- colSums(w2 * y1) - th2;
       y2 <- 1 / (1 + exp(-a2));
+   
       
+      output <- rep(0, 10);
       #Couche de sortie
       #Pour chaque neurone en sortie
       #dW2 <- alpha * (t - y2) * y2 * (1 - y2) * y1;
       for ( k in 1:10 ) {
+#         if (a2[[k]] >= 0) {
+#           y2[[k]] <- 1;
+#         }
+#         else {
+#           y2[[k]] <- 0;
+#         }
+        
+        output[k] <- checkLab(labels,j,k - 1); 
         #print(y2[[k]])
-        dw2[,k] <- alpha * (checkLab(labels,j,k - 1) - y2[[k]]) * y2[[k]] * (1 - y2[[k]]) * y1;
-        th2[k] <- th2[k] + alpha * (checkLab(labels,j,k - 1) - y2[[k]]) * y2[[k]] * (1 - y2[[k]]);
+        #Avec fonction sigmoide
+        dw2[,k] <- alpha * (output[k] - y2[[k]]) * y2[[k]] * (1 - y2[[k]]) * y1;
+        th2[k] <- th2[k] + alpha * (output[k] - y2[[k]]) * y2[[k]] * (1 - y2[[k]]);
+        #Avec fonction linéaire
+#         dw2[,k] <- alpha * (output[k] - y2[[k]]) * y1;
+#         th2[k] <- th2[k] + alpha * (output[k] - y2[[k]]);
       }
+      
       
       #Couche cachée
       #Pour chaque neurone de la couche cachée
       #dW1 <- - alpha * y1 * (1 - y1) * x * sum(-(t - y2) * w2);
       for ( k in 1:nNeurones ) {
-        output <- rep(0, 10);
-        for (l in 1:10) {
-          output[l] <- checkLab(labels,j,l - 1); 
-        }
         dw1[,k] <- - alpha * y1[[k]] * (1 - y1[[k]]) * x * sum(-(output - y2) * w2[k,]);
         th1[k] <- th1[k] - alpha * y1[[k]] * (1 - y1[[k]]) * 1 * sum(-(output - y2) * w2[k,]);
       }
+      
+      
       #Weights Update
       w1 <- w1 + dw1;
       w2 <- w2 + dw2;
     }
+    
   }
   
 #   res <- colSums(input * w) - th;
@@ -90,7 +102,7 @@ train <- function(dataTrain = dataTrain,
 
 test <- function (dataTest = dataTest,
                   res = res, #Contient le résultat de la fonction train() soit une liste avec les poids et seuils
-                  labelTest = 0) {
+                  labelTest = NULL) {
   w1 <- res$w1;
   th1 <- res$th1;
   w2 <- res$w2;
@@ -112,20 +124,28 @@ test <- function (dataTest = dataTest,
     a2 <- colSums(w2 * y1) - th2;
     y[i,] <- 1 / (1 + exp(-a2));
     res[i] <- which.max(y[i,]) - 1;
+#     for ( k in 1:10 ) {
+#       if (a2[[k]] >= 0) {
+#         y[i,k] <- 1;
+#       }
+#       else {
+#         y[i,k] <- 0;
+#       }
+#     }
   }
   
-  if (labelTest == 0) { #Si on ne connais pas les labels
+  if (is.null(labelTest)) { #Si on ne connais pas les labels
     return(list("res" = res, "stats" = 0));
-  }
+  }  
   else { #Si on veut évaluer le modèle
     c <- 0;
     for (i in 1:len) {
-      if (res[i] == labelTest[i,]) {
+      if (res[i] == labelTest[i]) {
         c <- c + 1;
       }
     }
     stats <- c / len;
-    return(list("res" = res, "stats" = stats));
+    return(list("res" = res, "stats" = stats, "y" = y));
   }
 }
 
@@ -140,11 +160,13 @@ labels <- read.table(file=file.choose());
 #"C:/Users/jretterer/Desktop/data/train-images.txt"
 images <-  read.table(file=file.choose());
 
-res <- train(images, labels, nIters = 500);
+res1 <- train(images, labels, nIters = 100, nSamples = 10000, nNeurones = 11);
 
-res2 <- test(images[1:400,], res, labels[1:400,]);
+res2 <- test(dataTest = images[10000:10400,], res = res1, labelTest = labels[10000:10400,]);
 
 res2$stats
+res2$res
+res2$y
 
 # alpha <- 0.3;
 # 
