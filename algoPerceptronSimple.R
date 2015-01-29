@@ -36,6 +36,17 @@ setLabel <- function( labels, x ) {
   return(label);
 }
 
+compare <- function( labels, labels_res ) {
+  nbcorrect <- 0;
+  for (i in 1:nrow(labels)) {
+    if (labels[i,] == labels_res[i,]) {
+      nbcorrect <- nbcorrect + 1;
+    }
+  }
+  return(nbcorrect);
+}
+
+
 results <- function ( t, y ) {
   tp <- 0;
   tn <- 0;
@@ -202,14 +213,19 @@ ecrireFichier <- function(images = images,
   for ( i in 1:ncol(input) ) {
       entries <- input[,i];
       j <- 1;
-      maxx <- 0;
+      maxx <- -100000;
       nbx <- 0;
       while ( j < 11 ) {
          a <- sum(entries * wres[j,]);
-         x <- sigmoide(a);
-         if(x > maxx){
-           maxx <- x;
-           nbx <- j - 1;
+         #x <- sigmoide(a);
+         #cat(sprintf("Nombre %s : a %s, x %s\n",j-1,a,x))
+         #if(x > maxx){
+         if(a > maxx){
+           #cat(sprintf("****Nombre %s : a %s, x %s\n",j-1,a,x))
+            #cat(sprintf("****Nombre %s : a %s\n",j-1,a))
+            #maxx <- x;
+            maxx <- a;
+            nbx <- j - 1;
          }
         j <- j + 1;
        }
@@ -224,37 +240,23 @@ ecrireFichier <- function(images = images,
 ############################
 
 #Load labels
-#path "C:/Users/Utilisateur/Desktop/IAData/ia/train-labels.gz"
-#"C:/Users/jretterer/Desktop/data/train-labels.txt"
 labels <- read.table(file=file.choose());
 
 #Load images
-#path "C:/Users/Utilisateur/Desktop/IAData/ia/train-images.gz"
-#"C:/Users/jretterer/Desktop/data/train-images.txt"
 images <-  read.table(file=file.choose());
 
-#Perceptron
-
-#lab <- 1;
-#label <- setLabel(labels[[1]], lab);
-
-#res1 <- perceptronSimple(images, label);
-#stats1 <- results(label, res1);
-#stats1
-#errorRate(stats1)
-#precision(stats1)
-#rappel(stats1)
-
-#res2$res <- perceptronSimpleSigmoide(images, label);
-#stats2 <- results(label, res2$res);
-#stats2
-#errorRate(stats2)
-#precision(stats2)
-#rappel(stats2)
-
+#reseau de neuronnes simples.
 wres <- reseau(images, labels,nIters = 500,nSamples = 2000);
 
-imagestest <-  read.table(file=file.choose());
+#permet d'écrire le fichier train_label_predit
+ecrireFichier(images, wres,"/Users/xaviereyl/Documents/RProject/train-labels-rendu.gz");
+#on le relit
+labels_rendu <- read.table(file=file.choose());
+#et on compare
+res <- compare(labels_rendu, labels);
+cat(sprintf(" %s nombres justes sur %s\n",res,nrow(labels)))
 
+#On créer le fichier prédit sur test
+imagestest <-  read.table(file=file.choose());
 #/Users/xaviereyl/Documents/RProject/test-labels.gz
 ecrireFichier(imagestest, wres,"/Users/xaviereyl/Documents/RProject/test-labels.gz");
