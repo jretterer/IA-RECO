@@ -48,12 +48,7 @@ train <- function(dataTrain = dataTrain,
   th2 <- runif(10, -1, 1);
   
   for ( i in 1:nIters ) {
-#     if (i %% 100 == 0) {
-#       print(i)
-#     }
     print(i)
-    print(th2)
-    print(th1)
     for ( j in 1:nSamples ) {
       x <- input[,j];
       
@@ -65,29 +60,16 @@ train <- function(dataTrain = dataTrain,
       a2 <- colSums(w2 * y1) - th2;
       y2 <- 1 / (1 + exp(-a2));
    
-      
       output <- rep(0, 10);
       #Couche de sortie
       #Pour chaque neurone en sortie
       #dW2 <- alpha * (t - y2) * y2 * (1 - y2) * y1;
-      for ( k in 1:10 ) {
-#         if (a2[[k]] >= 0) {
-#           y2[[k]] <- 1;
-#         }
-#         else {
-#           y2[[k]] <- 0;
-#         }
-        
+      for ( k in 1:10 ) {      
         output[k] <- checkLab(labels,j,k - 1); 
-        #print(y2[[k]])
         #Avec fonction sigmoide
         dw2[,k] <- alpha * (output[k] - y2[[k]]) * y2[[k]] * (1 - y2[[k]]) * y1;
         th2[k] <- th2[k] + alpha * (output[k] - y2[[k]]) * y2[[k]] * (1 - y2[[k]]);
-        #Avec fonction linéaire
-#         dw2[,k] <- alpha * (output[k] - y2[[k]]) * y1;
-#         th2[k] <- th2[k] + alpha * (output[k] - y2[[k]]);
       }
-      
       
       #Couche cachée
       #Pour chaque neurone de la couche cachée
@@ -97,17 +79,13 @@ train <- function(dataTrain = dataTrain,
         th1[k] <- th1[k] - alpha * y1[[k]] * (1 - y1[[k]]) * 1 * sum(-(output - y2) * w2[k,]);
       }
       
-      
       #Weights Update
       w1 <- w1 + dw1;
       w2 <- w2 + dw2;
     }
     
   }
-  
-#   res <- colSums(input * w) - th;
-#   res <- replace(res, which(res > validation), 1);
-#   res <- replace(res, which(res <= validation), 0);
+
   return(list("w1" = w1,"th1" = th1, "w2" = w2,"th2" = th2));
 }
 
@@ -135,14 +113,6 @@ test <- function (dataTest = dataTest,
     a2 <- colSums(w2 * y1) - th2;
     y[i,] <- 1 / (1 + exp(-a2));
     res[i] <- which.max(y[i,]) - 1;
-#     for ( k in 1:10 ) {
-#       if (a2[[k]] >= 0) {
-#         y[i,k] <- 1;
-#       }
-#       else {
-#         y[i,k] <- 0;
-#       }
-#     }
   }
   
   if (is.null(labelTest)) { #Si on ne connais pas les labels
@@ -156,7 +126,7 @@ test <- function (dataTest = dataTest,
       }
     }
     stats <- c / len;
-    return(list("res" = res, "stats" = stats, "y" = y));
+    return(list("res" = res, "stats" = stats));
   }
 }
 
@@ -204,51 +174,3 @@ cat(sprintf(" %s nombres justes sur %s\n",nombre,nrow(labels)))
 imagestest <-  read.table(file=file.choose());
 res4 <- test(dataTest = imagestest[0:10000,], res = res1);
 ecrireFichier(res4$res,"/Users/xaviereyl/Documents/RProject/test-labels-multi.gz");
-
-
-# alpha <- 0.3;
-# 
-# w1 <- matrix(,784,4);
-# dW1 <- w1;
-# for ( i in 1:4 ) {
-#   w1[,i] <- runif((784), -1, 1);
-# }
-# th1 <- rep(0.3, 4);
-# 
-# #Initialize weights and threshold with random values in the output layer
-# w2 <- matrix(,4,10);
-# dW2 <- w2;
-# for ( i in 1:10 ) {
-#   w2[,i] <- runif((4), -1, 1);
-# }
-# th2 <- rep(0.3, 10);
-
-# input <- t((images[,1:784]) / 255);
-#x <- input[,1];
-
-# a1 <- colSums(w1 * x) - th1;
-# 
-# y1 <- 1 / (1 + exp(-a1));
-#   
-# a2 <- colSums(w2 * y1) - th2;
-#   
-# y2 <- 1 / (1 + exp(-a2));
-
-#Couche de sortie
-#Pour chaque neurone en sortie
-#dW2 <- alpha * (t - y2) * y2 * (1 - y2) * y1;
-# for ( i in 1:10 ) {
-#   print(y2[[i]])
-#   dW2[,i] <- alpha * (t(labels,1,i - 1) - y2[[i]]) * y2[[i]] * (1 - y2[[i]]) * y1;
-# }
-
-#Couche cachée
-#Pour chaque neurone de la couche cachée
-#dW1 <- - alpha * y1 * (1 - y1) * x * sum(-(t - y2) * w2);
-# for ( i in 1:4 ) {
-#   output <- rep(0, 10);
-#   for (j in 1:10) {
-#     output[j] <- t(labels,1,j - 1); 
-#   }
-#   dW1[,i] <- - alpha * y1[[i]] * (1 - y1[[i]]) * x * sum(-(output - y2) * w2[i,]);
-# }
