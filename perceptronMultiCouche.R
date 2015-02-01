@@ -8,17 +8,6 @@ checkLab <- function(label, i, x) {
   }
 }
 
-#compare 2 labels
-compare <- function( labels, labels_res ) {
-  nbcorrect <- 0;
-  for (i in 1:nrow(labels)) {
-    if (labels[i,] == labels_res[i,]) {
-      nbcorrect <- nbcorrect + 1;
-    }
-  }
-  return(nbcorrect);
-}
-
 #Perceptron multicouches avec fonction sigmoide
 train <- function(dataTrain = dataTrain,
                 labelTrain = labelTrain,
@@ -47,8 +36,21 @@ train <- function(dataTrain = dataTrain,
   }
   th2 <- runif(10, -1, 1);
   
+  err <- rep(0, nIters);
+  labels2 <- matrix(,nSamples,10);
+  for ( i in 1:nSamples ) {
+    for ( j in 1:10 ) {
+      if (labels[i,] == (j - 1)) {
+        labels2[i,j] <- 1;
+      }
+      else labels2[i,j] <- 0;
+    }
+  }
+  y <- matrix(,nSamples,10);
+  
   for ( i in 1:nIters ) {
     print(i)
+    e <- 0;
     for ( j in 1:nSamples ) {
       x <- input[,j];
       
@@ -59,6 +61,8 @@ train <- function(dataTrain = dataTrain,
       #Fonction sigmoide
       a2 <- colSums(w2 * y1) - th2;
       y2 <- 1 / (1 + exp(-a2));
+      
+      y[j,] <- y2;
    
       output <- rep(0, 10);
       #Couche de sortie
@@ -82,11 +86,13 @@ train <- function(dataTrain = dataTrain,
       #Weights Update
       w1 <- w1 + dw1;
       w2 <- w2 + dw2;
+      
+      e <- e + 1/2 * sum((labels2[j,] - y[j,]) * (labels2[j,] - y[j,]));
     }
-    
+    err[i] <- e;
   }
 
-  return(list("w1" = w1,"th1" = th1, "w2" = w2,"th2" = th2));
+  return(list("w1" = w1,"th1" = th1, "w2" = w2,"th2" = th2, "err" = err));
 }
 
 test <- function (dataTest = dataTest,
@@ -137,28 +143,44 @@ ecrireFichier <- function(label = label,
   fileConn<-file(nameFichier);
   res<-c();
   for ( i in 1:length(label) ) {    
-    res<-c(res,paste("",label[i]));
+    res<-c(res,paste(label[i],"", sep = ""));
   }
   writeLines(res, fileConn);
   close(fileConn);
 }
 
-#Load labels
+################################################
+#1-Charger les fonctions dans l'environnement R#
+################################################
+
+######################
+#2-Charger les labels#
+######################
 labels <- read.table(file=file.choose());
 
-#Load images
+######################
+#3-Charger les images#
+######################
 images <-  read.table(file=file.choose());
 
-#train sur 10000 images
+###################
+#4-Train le modèle#
+###################
 res1 <- train(images, labels, nIters = 100, nSamples = 10000, nNeurones = 11);
 
-#test sur 50000
+####################
+#5-Tester le modèle#
+####################
 res2 <- test(dataTest = images[10000:60000,], res = res1, labelTest = labels[10000:60000,]);
 res2$stats
 res2$res
 
-#ecriture du fichier test_label
-#load test-images
+#######################################################
+#6-Générer les labels correspondant aux images de test#
+#######################################################
+#Charger le fichier test-images
 imagestest <-  read.table(file=file.choose());
+#Tester le modèle calculé précédemment
 res3 <- test(dataTest = imagestest, res = res1);
+#Ecrire le résultat dans un fichier
 ecrireFichier(res3$res,"test-labels.gz");
