@@ -217,13 +217,7 @@ ecrireFichier <- function(images = images,
       nbx <- 0;
       while ( j < 11 ) {
          a <- sum(entries * wres[j,]);
-         #x <- sigmoide(a);
-         #cat(sprintf("Nombre %s : a %s, x %s\n",j-1,a,x))
-         #if(x > maxx){
          if(a > maxx){
-           #cat(sprintf("****Nombre %s : a %s, x %s\n",j-1,a,x))
-            #cat(sprintf("****Nombre %s : a %s\n",j-1,a))
-            #maxx <- x;
             maxx <- a;
             nbx <- j - 1;
          }
