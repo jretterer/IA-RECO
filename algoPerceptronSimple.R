@@ -102,7 +102,7 @@ perceptronSimple <- function(dataTrain = dataTrain,
   
   #Initialize weights and threshhold with random values
   w <- runif(784, -1, 1);
-  #th <- runif(1, -1, 1);
+  th <- runif(1, -1, 1);
   
   for ( i in 1:nIters ) {
     if (i %% 100 == 0) { #Affiche uniquement les multiple de 100 (donc 100/200/300/400/500 si 500 nIters)
