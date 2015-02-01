@@ -19,14 +19,14 @@ compare <- function( labels, labels_res ) {
   return(nbcorrect);
 }
 
-#Perceptron Simple avec fonction sigmoide
+#Perceptron multicouches avec fonction sigmoide
 train <- function(dataTrain = dataTrain,
                 labelTrain = labelTrain,
                 alpha = 0.25, 
                 nIters = 500, 
                 nSamples = 2000,
                 nNeurones = 4) {
-  #Normalsier entre -1 et 1 les valeurs des niveaux de gris
+  #Normalsier entre 0 et 1 les valeurs des niveaux de gris
   input <- t((dataTrain[,1:784]) / 255);
   
   #label <- labelTrain; #label = 1 si chiffre recherché, label = 0 sinon
@@ -144,33 +144,21 @@ ecrireFichier <- function(label = label,
 }
 
 #Load labels
-#path "C:/Users/Utilisateur/Desktop/IAData/ia/train-labels.gz"
-#"C:/Users/jretterer/Desktop/data/train-labels.txt"
 labels <- read.table(file=file.choose());
 
 #Load images
-#path "C:/Users/Utilisateur/Desktop/IAData/ia/train-images.gz"
-#"C:/Users/jretterer/Desktop/data/train-images.txt"
 images <-  read.table(file=file.choose());
 
+#train sur 10000 images
 res1 <- train(images, labels, nIters = 100, nSamples = 10000, nNeurones = 11);
 
-#comparaison sur 400
-res2 <- test(dataTest = images[10000:10400,], res = res1, labelTest = labels[10000:10400,]);
+#test sur 50000
+res2 <- test(dataTest = images[10000:60000,], res = res1, labelTest = labels[10000:60000,]);
 res2$stats
 res2$res
-res2$y
-
-#comparaison sur tout le train
-res3 <- test(dataTest = images[0:60000,], res = res1, labelTest = labels[0:60000,]);
-res3$stats
-ecrireFichier(res3$res,"/Users/xaviereyl/Documents/RProject/train-labels-multi.gz");#reecrit pour vérifier
-labels_rendu <- read.table(file=file.choose());
-#et on compare
-nombre <- compare(labels_rendu, labels);
-cat(sprintf(" %s nombres justes sur %s\n",nombre,nrow(labels)))
 
 #ecriture du fichier test_label
+#load test-images
 imagestest <-  read.table(file=file.choose());
-res4 <- test(dataTest = imagestest[0:10000,], res = res1);
-ecrireFichier(res4$res,"/Users/xaviereyl/Documents/RProject/test-labels-multi.gz");
+res3 <- test(dataTest = imagestest, res = res1);
+ecrireFichier(res3$res,"test-labels.gz");
